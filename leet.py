@@ -13,6 +13,7 @@ RANDOM_SEED = 42
 NUM_GENERAL = 25
 NUM_SQL = random.randint(5, 7)
 NUM_SYSTEM_DESIGN = 5
+SKIP = 0
 
 # GraphQL query to fetch problems
 PROBLEM_QUERY = gql("""
@@ -51,7 +52,7 @@ async def fetch_problems(client, filters, limit=1000):
     params = {
         "categorySlug": "",
         "limit": limit,
-        "skip": 0,
+        "skip": SKIP,
         "filters": filters
     }
     result = await client.execute(PROBLEM_QUERY, variable_values=params)
@@ -73,8 +74,13 @@ async def main():
         all_problems = await fetch_problems(client, filters={})
         # General problems (any difficulty)
         general_sample = filter_and_sample(all_problems, NUM_GENERAL, RANDOM_SEED)
-        # SQL problems (medium/hard)
-        sql_problems = [p for p in all_problems if any('sql' in tag['slug'] for tag in p['topicTags']) and p['difficulty'] in ('Medium', 'Hard')]
+        # SQL problems (medium/hard, with 'database' or 'sql' tags, and not 'Easy')
+        sql_tag_slugs = {'sql', 'database', 'relational-database'}
+        sql_problems = [
+            p for p in all_problems
+            if any(tag['slug'] in sql_tag_slugs for tag in p['topicTags'])
+            and p['difficulty'] in ('Medium', 'Hard')
+        ]
         sql_sample = filter_and_sample(sql_problems, NUM_SQL, RANDOM_SEED + 1)
         # System Design problems (medium/hard)
         sys_design_problems = [p for p in all_problems if any('system-design' in tag['slug'] or 'design' in tag['slug'] for tag in p['topicTags']) and p['difficulty'] in ('Medium', 'Hard')]
