@@ -11,7 +11,7 @@ RANDOM_SEED = 42
 
 # Number of problems to fetch
 NUM_GENERAL = 25
-NUM_SQL = random.randint(5, 7)
+NUM_SQL = 10
 NUM_SYSTEM_DESIGN = 5
 SKIP = 0
 
